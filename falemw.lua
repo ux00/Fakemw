@@ -11,22 +11,14 @@ local Window = Rayfield:CreateWindow({
     }
 })
 
-local MainTab = Window:CreateTab("Main", 4483362458)
 local CactusTab = Window:CreateTab("Cactus Hitbox", 4483362458)
 
--- ==================== VARIABLES ====================
+-- Variables Cactus
 local cactusHitboxSize = 5
 local cactusConnection = nil
 
--- Variables para Auto Jump
-local autoJumpEnabled = false
-local jumpIntensity = 10  -- Valor por defecto (3 a 20)
-
--- ==================== CACTUS HITBOX (TU CÓDIGO ORIGINAL SIN CAMBIOS) ====================
-
 local function ExpandCactusHitbox(size)
     if cactusConnection then cactusConnection:Disconnect() end
-    
     cactusConnection = game:GetService("RunService").Heartbeat:Connect(function()
         for _, obj in pairs(workspace:GetDescendants()) do
             if obj:IsA("BasePart") and (obj.Name:lower():find("cactus") or (obj.TextureID and obj.TextureID:find("cactus"))) then
@@ -70,9 +62,12 @@ CactusTab:CreateSlider({
     end,
 })
 
--- ==================== NUEVA SECCIÓN: AUTO JUMP ====================
+-- ==================== AUTO JUMP ====================
 
 local JumpTab = Window:CreateTab("Auto Jump", 4483362458)
+
+local autoJumpEnabled = false
+local jumpIntensity = 10
 
 JumpTab:CreateToggle({
     Name = "Auto Jump (Presiona Espacio)",
@@ -80,26 +75,23 @@ JumpTab:CreateToggle({
     Flag = "AutoJumpToggle",
     Callback = function(Value)
         autoJumpEnabled = Value
-        Rayfield:Notify("Auto Jump", Value and "Activado - Intensidad: " .. jumpIntensity or "Desactivado", 3)
+        Rayfield:Notify("Auto Jump", Value and "Activado ✓" or "Desactivado ✕", 3)
     end,
 })
 
 JumpTab:CreateSlider({
-    Name = "Jump Intensity",
+    Name = "Jump Intensity (3-20)",
     Range = {3, 20},
     Increment = 1,
     CurrentValue = 10,
     Flag = "JumpIntensity",
     Callback = function(Value)
         jumpIntensity = Value
-        Rayfield:Notify("Intensidad de Salto", "Cambiada a: " .. Value, 2)
     end,
 })
 
--- ==================== LÓGICA DEL AUTO JUMP ====================
-
+-- Lógica del Auto Jump
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -110,25 +102,17 @@ player.CharacterAdded:Connect(function(newChar)
     humanoid = newChar:WaitForChild("Humanoid")
 end)
 
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
     if input.KeyCode == Enum.KeyCode.Space and autoJumpEnabled then
-        if humanoid:GetState() \~= Enum.HumanoidStateType.Jumping 
-           and humanoid:GetState() \~= Enum.HumanoidStateType.Freefall then
-            
-            local rootPart = character:FindFirstChild("HumanoidRootPart")
-            if rootPart then
-                -- Intensidad ajustable (multiplicador para que se sienta bien en Evade)
-                local jumpPower = jumpIntensity * 5  
-                rootPart.Velocity = Vector3.new(rootPart.Velocity.X, jumpPower, rootPart.Velocity.Z)
+        if humanoid:GetState() \~= Enum.HumanoidStateType.Jumping and humanoid:GetState() \~= Enum.HumanoidStateType.Freefall then
+            local root = character:FindFirstChild("HumanoidRootPart")
+            if root then
+                local power = jumpIntensity * 5
+                root.Velocity = Vector3.new(root.Velocity.X, power, root.Velocity.Z)
             end
         end
     end
 end)
 
--- ==================== NOTIFICACIÓN FINAL ====================
-
-Rayfield:Notify("Script Cargado", "Cactus Hitbox + Auto Jump listo\nPresiona Espacio para saltar cuando esté activado", 6)
-
-print("✅ Evade Script cargado | Cactus Hitbox + Auto Jump añadido")
+Rayfield:Notify("Script Cargado", "Cactus Hitbox + Auto Jump listo\nUsa la pestaña Auto Jump", 5)
