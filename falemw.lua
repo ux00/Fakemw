@@ -1,84 +1,76 @@
 -- =============================================
--- EVADE - AUTO JUMP / BHOP con Rayfield
+-- EVADE - AUTO JUMP / BHOP
 -- by snmsmnz
 -- =============================================
 
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield", true))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Evade | Auto Jump",
+    Name = "Evade - Auto Jump",
     LoadingTitle = "Evade Script",
     LoadingSubtitle = "by snmsmnz",
     ConfigurationSaving = {
         Enabled = true,
-        FolderName = "EvadeScripts",
-        FileName = "AutoJumpConfig"
+        FolderName = "EvadeAutoJump",
+        FileName = "Config"
     }
 })
 
-local MainTab = Window:CreateTab("Main", 4483362458)
+local Tab = Window:CreateTab("Auto Jump", 4483362458)
 
 -- Variables
 local autoJumpEnabled = false
 local jumpIntensity = 12
 
--- ==================== AUTO JUMP SECTION ====================
-
-MainTab:CreateToggle({
-    Name = "Auto Jump / Bhop",
+-- Toggle
+Tab:CreateToggle({
+    Name = "Auto Jump (Presiona Espacio)",
     CurrentValue = false,
-    Flag = "AutoJumpToggle",
+    Flag = "AutoJump",
     Callback = function(Value)
         autoJumpEnabled = Value
-        Rayfield:Notify("Auto Jump", Value and "Activado ✅" or "Desactivado ❌", 3)
+        Rayfield:Notify("Auto Jump", Value and "✅ Activado" or "❌ Desactivado", 3)
     end,
 })
 
-MainTab:CreateSlider({
-    Name = "Jump Intensity (Bhob Height)",
+-- Slider (como en tu imagen)
+Tab:CreateSlider({
+    Name = "Jump Intensity / Bhop Height",
     Range = {3, 25},
     Increment = 1,
     CurrentValue = 12,
-    Flag = "JumpIntensity",
+    Flag = "Intensity",
     Callback = function(Value)
         jumpIntensity = Value
     end,
 })
 
--- ==================== LÓGICA DEL AUTO JUMP ====================
-
+-- Lógica del Auto Jump
 local UIS = game:GetService("UserInputService")
 local player = game.Players.LocalPlayer
 
-local function doJump()
-    if not autoJumpEnabled then return end
-    
-    local character = player.Character
-    if not character then return end
-    
-    local humanoid = character:FindFirstChild("Humanoid")
-    local rootPart = character:FindFirstChild("HumanoidRootPart")
-    
-    if humanoid and rootPart then
-        -- Solo salta si no está en el aire
-        if humanoid:GetState() \~= Enum.HumanoidStateType.Jumping 
-           and humanoid:GetState() \~= Enum.HumanoidStateType.Freefall then
-            
-            local power = jumpIntensity * 5.2   -- Multiplicador optimizado para Evade
-            rootPart.Velocity = Vector3.new(rootPart.Velocity.X, power, rootPart.Velocity.Z)
-        end
-    end
-end
-
--- Detectar cuando se presiona Espacio
 UIS.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.Space then
-        doJump()
+    
+    if input.KeyCode == Enum.KeyCode.Space and autoJumpEnabled then
+        local character = player.Character
+        if not character then return end
+        
+        local humanoid = character:FindFirstChild("Humanoid")
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        
+        if humanoid and rootPart then
+            if humanoid:GetState() \~= Enum.HumanoidStateType.Jumping 
+               and humanoid:GetState() \~= Enum.HumanoidStateType.Freefall then
+                
+                local power = jumpIntensity * 5.5
+                rootPart.Velocity = Vector3.new(rootPart.Velocity.X, power, rootPart.Velocity.Z)
+            end
+        end
     end
 end)
 
 -- Notificación final
-Rayfield:Notify("Script Cargado", "Auto Jump listo\nUsa el toggle y el slider", 5)
+Rayfield:Notify("Script Cargado", "Auto Jump listo\nActiva el toggle y ajusta la intensidad", 6)
 
-print("Evade Auto Jump Script cargado correctamente")
+print("✅ Evade Auto Jump Script cargado correctamente")
